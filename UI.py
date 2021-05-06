@@ -48,25 +48,30 @@ def startCountdown():
     try:
         userinput = int(hour.get())*3600 + int(minute.get()) * \
             60 + int(second.get())
+        # Time when the user hit the start button
+        last_time = 0
+
     except:
         messagebox.showwarning('', 'Invalid Input!')
     while userinput > -1:
         mins, secs = divmod(userinput, 60)
         hours = 0
+
         if mins > 60:
             hours, mins = divmod(mins, 60)
 
         hour.set("{0:2d}".format(hours))
         minute.set("{0:2d}".format(mins))
         second.set("{0:2d}".format(secs))
-
         ws.update()
-        time.sleep(1)
 
         if (userinput == 0):
             messagebox.showinfo("", "Time's Up")
-
-        userinput -= 1
+        
+        #non blocking way to run the timer down 
+        if time.time() - last_time >= 1: 
+            userinput -= 1
+            last_time = time.time()
 
 
 start_btn = Button(
