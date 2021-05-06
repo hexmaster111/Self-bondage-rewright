@@ -45,7 +45,7 @@ while(True):
     _, stDev = cv2.meanStdDev(mod)
  
     cv2.imshow('dist', mod)
-    cv2.putText(frame2, "Standard Deviation - {}".format(round(stDev[0][0],0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
+    cv2.putText(frame2, "Movement Score - {}".format(round(stDev[0][0],0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
     if stDev > sdThresh:
             print("Motion detected.. Do something!!!");
 
