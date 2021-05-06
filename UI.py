@@ -5,10 +5,17 @@ from tkinter import messagebox
 
 f = ("Arial", 24)
 
+
 ws = Tk()
 ws.geometry("300x250+1500+700")
 ws.title("Timer")
 ws.config(bg='#345')
+
+setupWindow = Tk()
+setupWindow.title("Selfbondage Setup")
+setupWindow.config(bg='#345')
+
+
 
 hour = StringVar()
 minute = StringVar()
@@ -43,8 +50,12 @@ sec_tf = Entry(
 
 sec_tf.place(x=180, y=20)
 
+global release_tested
 
-def startCountdown():
+release_tested = False
+
+
+def countDownLoop():
     try:
         userinput = int(hour.get())*3600 + int(minute.get()) * \
             60 + int(second.get())
@@ -54,6 +65,11 @@ def startCountdown():
     except:
         messagebox.showwarning('', 'Invalid Input!')
     while userinput > -1:
+        if(release_tested == False):  # if the user didnt test the release mech, we need to not run
+            messagebox.showwarning('', 'YOU MUST TEST THAT YOUR RELESE METHOD WORKS AS INTENDED\
+ SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
+            return
+
         mins, secs = divmod(userinput, 60)
         hours = 0
 
@@ -66,22 +82,41 @@ def startCountdown():
         ws.update()
 
         if (userinput == 0):
+            release()
             messagebox.showinfo("", "Time's Up")
-        
-        #non blocking way to run the timer down 
-        if time.time() - last_time >= 1: 
+
+        # non blocking way to run the timer down
+        if time.time() - last_time >= 1:
             userinput -= 1
             last_time = time.time()
 
 
+def release():  # Function to run whatever release mech the user selected
+    # TODO add user selection to the release script/cd drive
+    global release_tested
+    release_tested = True
+    print("Release workes!!")
+
+
+# Where we place all the buttons
 start_btn = Button(
-    ws,
+    setupWindow,
     text='START',
     bd='5',
-    command=startCountdown
+    command=countDownLoop
 )
 
-start_btn.place(x= 120, y = 120)
+start_btn.place(x=120, y=120)
+
+test_release = Button(
+    setupWindow,
+    text='TEST',
+    bd='5',
+    command=release
+)
+
+test_release.place(x=120, y=150)
 
 
 ws.mainloop()
+setupWindow.mainloop()
