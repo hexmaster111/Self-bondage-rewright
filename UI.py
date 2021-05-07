@@ -6,6 +6,8 @@ import time
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
+import numpy as np
+import cv2
 
 
 # Window Setups
@@ -19,9 +21,6 @@ setupWindow = Tk()
 setupWindow.title("Selfbondage Setup")
 setupWindow.config(bg='#345')
 
-
-
-
 # Define our globals
 release_tested = False
 hour = StringVar()
@@ -31,10 +30,6 @@ second = StringVar()
 hour.set("00")
 minute.set("00")
 second.set("00")
-
-#setting up lables
-
-
 
 # Placing Text boxes for timer
 hour_tf = Entry(
@@ -113,7 +108,7 @@ def startWith1Min(): #Used for setup time
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
         return
     print("Starting with one minute setup")
-    timeToStart_min = .1 #@TODO make this a user definable number, time in munutes
+    timeToStart_min = 1 #@TODO make this a user definable number, time in munutes
     timeToStart_ms = timeToStart_min * 1000
     last_time = time.time()
     display_time=timeToStart_min*60
@@ -127,7 +122,7 @@ def startWith1Min(): #Used for setup time
         if time.time() - last_time >= 1:
             display_time -= 1
             last_time = time.time()
-    countDownLoop()
+    countDownLoop() 
 
 
 # Where we place all the buttons
@@ -158,8 +153,12 @@ test_release = Button(
 
 test_release.place(x=120, y=150)
 
+##setting up lables
+#timer for tie up time
 setupTimer = tk.Label(setupWindow)
 setupTimer.place(x=140, y=000)
+#
+
 
 ws.mainloop()
 setupWindow.mainloop()
