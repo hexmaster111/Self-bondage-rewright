@@ -25,7 +25,6 @@ cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 _, frame1 = cap.read()
 _, frame2 = cap.read()
  
-facecount = 0
 while(True):
     _, frame3 = cap.read()
     rows, cols, _ = np.shape(frame3)

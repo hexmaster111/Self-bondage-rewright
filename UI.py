@@ -18,6 +18,7 @@ ws.title("Selfbondage Stream Window")
 ws.config(bg='#345')
 
 setupWindow = Tk()
+setupWindow.geometry("800x400")  # l*w+lat+lon
 setupWindow.title("Selfbondage Setup")
 setupWindow.config(bg='#345')
 
@@ -26,6 +27,10 @@ release_tested = False
 hour = StringVar()
 minute = StringVar()
 second = StringVar()
+
+# The var to determin how much movement is ok
+sdThresh = 10
+font = cv2.FONT_HERSHEY_SIMPLEX
 
 hour.set("00")
 minute.set("00")
@@ -58,6 +63,50 @@ sec_tf = Entry(
 sec_tf.place(x=180, y=20)
 
 
+def distMap(frame1, frame2):
+    """outputs pythagorean distance between two frames"""
+    frame1_32 = np.float32(frame1)
+    frame2_32 = np.float32(frame2)
+    diff32 = frame1_32 - frame2_32
+    norm32 = np.sqrt(diff32[:, :, 0]**2 + diff32[:, :, 1] **
+                     2 + diff32[:, :, 2]**2)/np.sqrt(255**2 + 255**2 + 255**2)
+    dist = np.uint8(norm32*255)
+    return dist
+
+
+cv2.namedWindow('frame')
+cv2.namedWindow('dist')
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+
+def prossessVideo():
+    _, frame1 = cap.read()
+    _, frame2 = cap.read()
+
+    _, frame3 = cap.read()
+    rows, cols, _ = np.shape(frame3)
+    cv2.imshow('dist', frame3)
+    dist = distMap(frame1, frame3)
+
+    frame1 = frame2
+    frame2 = frame3
+
+    # apply Gaussian smoothing
+    mod = cv2.GaussianBlur(dist, (9, 9), 0)
+
+    # apply thresholding
+    _, thresh = cv2.threshold(mod, 100, 255, 0)
+
+    # calculate st dev test
+    _, stDev = cv2.meanStdDev(mod)
+
+    cv2.imshow('dist', mod)
+    cv2.putText(frame2, "Movement Score - {}".format(
+        round(stDev[0][0], 0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
+    if stDev > sdThresh:
+        print("Motion detected.. Do something!!!")
+
+    cv2.imshow('frame', frame2)
 
 
 def countDownLoop():
@@ -70,6 +119,9 @@ def countDownLoop():
     except:
         messagebox.showwarning('', 'Invalid Input!')
     while userinput > -1:
+
+        prossessVideo()
+
         if(release_tested == False):  # if the user didnt test the release mech, we need to not run
             messagebox.showwarning('', 'YOU MUST TEST THAT YOUR RELESE METHOD WORKS AS INTENDED\
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
@@ -102,27 +154,35 @@ def release():  # Function to run whatever release mech the user selected
     release_tested = True
     print("Release workes!!")
 
-def startWith1Min(): #Used for setup time
+
+def startWith1Min():  # Used for setup time
     if(release_tested == False):  # if the user didnt test the release mech, we need to not run
         messagebox.showwarning('', 'YOU MUST TEST THAT YOUR RELESE METHOD WORKS AS INTENDED\
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
         return
     print("Starting with one minute setup")
-    timeToStart_min = 1 #@TODO make this a user definable number, time in munutes
+    timeToStart_min = 1  # @TODO make this a user definable number, time in munutes
     timeToStart_ms = timeToStart_min * 1000
     last_time = time.time()
-    display_time=timeToStart_min*60
+    display_time = timeToStart_min*60
     while display_time > -1:
-        #update the window
+        # update the window
         setupWindow.update()
         ws.update()
 
         setupTimer['text'] = display_time
-        
+
         if time.time() - last_time >= 1:
             display_time -= 1
             last_time = time.time()
-    countDownLoop() 
+    countDownLoop()
+
+
+def quit():
+    print("Closing Program")
+    cap.release()
+    cv2.destroyAllWindows()
+    exit()
 
 
 # Where we place all the buttons
@@ -134,6 +194,15 @@ start_btn = Button(
 )
 
 start_btn.place(x=120, y=120)
+
+quit_button = Button(
+    setupWindow,
+    text='Exit',
+    bd='5',
+    command=quit
+)
+
+quit_button.place(x=120, y=200)
 
 start_with_setup_time = Button(
     setupWindow,
@@ -153,8 +222,8 @@ test_release = Button(
 
 test_release.place(x=120, y=150)
 
-##setting up lables
-#timer for tie up time
+# setting up lables
+# timer for tie up time
 setupTimer = tk.Label(setupWindow)
 setupTimer.place(x=140, y=000)
 #
