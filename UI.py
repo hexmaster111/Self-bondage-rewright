@@ -9,7 +9,6 @@ import tkinter as tk
 import numpy as np
 import cv2
 
-
 # Window Setups
 f = ("Arial", 24)
 ws = Tk()
@@ -62,7 +61,6 @@ sec_tf = Entry(
 
 sec_tf.place(x=180, y=20)
 
-
 def distMap(frame1, frame2):
     """outputs pythagorean distance between two frames"""
     frame1_32 = np.float32(frame1)
@@ -73,13 +71,11 @@ def distMap(frame1, frame2):
     dist = np.uint8(norm32*255)
     return dist
 
-
 cv2.namedWindow('frame')
 cv2.namedWindow('dist')
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-
-def prossessVideo():
+def prossessVideo():  # @TODO make this run when we are sitting idle
     _, frame1 = cap.read()
     _, frame2 = cap.read()
 
@@ -103,11 +99,8 @@ def prossessVideo():
     cv2.imshow('dist', mod)
     cv2.putText(frame2, "Movement Score - {}".format(
         round(stDev[0][0], 0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
-    if stDev > sdThresh:
-        print("Motion detected.. Do something!!!")
-
     cv2.imshow('frame', frame2)
-
+    return(stDev)
 
 def countDownLoop():
     try:
@@ -119,13 +112,15 @@ def countDownLoop():
     except:
         messagebox.showwarning('', 'Invalid Input!')
     while userinput > -1:
-
-        prossessVideo()
-
         if(release_tested == False):  # if the user didnt test the release mech, we need to not run
             messagebox.showwarning('', 'YOU MUST TEST THAT YOUR RELESE METHOD WORKS AS INTENDED\
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
             return
+
+        movementVal = prossessVideo()
+        if movementVal > motionSlider.get():
+            print("movement")
+            # @TODO Add a user setable amount of time to time remaning
 
         mins, secs = divmod(userinput, 60)
         hours = 0
@@ -154,7 +149,6 @@ def release():  # Function to run whatever release mech the user selected
     release_tested = True
     print("Release workes!!")
 
-
 def startWith1Min():  # Used for setup time
     if(release_tested == False):  # if the user didnt test the release mech, we need to not run
         messagebox.showwarning('', 'YOU MUST TEST THAT YOUR RELESE METHOD WORKS AS INTENDED\
@@ -177,9 +171,7 @@ def startWith1Min():  # Used for setup time
             last_time = time.time()
     countDownLoop()
 
-
 def quit():
-    print("Closing Program")
     cap.release()
     cv2.destroyAllWindows()
     exit()
@@ -202,7 +194,7 @@ quit_button = Button(
     command=quit
 )
 
-quit_button.place(x=120, y=200)
+quit_button.place(x=0, y=150)
 
 start_with_setup_time = Button(
     setupWindow,
@@ -222,6 +214,14 @@ test_release = Button(
 
 test_release.place(x=120, y=150)
 
+# Setup for Sliders
+# slider for cam sencitivity
+motionSlider = Scale(setupWindow, from_=0, to=50,
+                     length=1000, tickinterval=1)
+motionSlider.set(15)
+motionSlider.pack()
+
+
 # setting up lables
 # timer for tie up time
 setupTimer = tk.Label(setupWindow)
@@ -231,3 +231,4 @@ setupTimer.place(x=140, y=000)
 
 ws.mainloop()
 setupWindow.mainloop()
+prossessVideo()
