@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # TODO Add labes for the timer
 # TODO on the setup window, there will be hiddent timer for setup time
 # with a start in 1 min button and a add 1 min button
