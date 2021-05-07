@@ -221,6 +221,8 @@ motionSlider = Scale(setupWindow, from_=0, to=50,
 motionSlider.set(15)
 motionSlider.pack()
 
+#Entry box
+
 
 # setting up lables
 # timer for tie up time
@@ -231,4 +233,3 @@ setupTimer.place(x=140, y=000)
 
 ws.mainloop()
 setupWindow.mainloop()
-prossessVideo()
