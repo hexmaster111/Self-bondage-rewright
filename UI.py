@@ -2,14 +2,14 @@
 # TODO Add labes for the timer
 # TODO on the setup window, there will be hiddent timer for setup time
 # TODO add a way to check the cam even if we arnt running a timer
+# TODO get the display updating when sitting idle
 # with a start in 1 min button and a add 1 min button
 
-import time, cv2, threading, sys
+import time, cv2
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
 import numpy as np
-from queue import Queue
 
 
 
@@ -108,17 +108,7 @@ def prossessVideo():
     cv2.imshow('frame', frame2)
     return(stDev)
 
-movementData =  Queue()
 
-
-def updateVideoDisplay(): # make us prossess that video even if a timer isnt running
-    while True:
-        movementData.put(prossessVideo())
-        
-
-videoDisplay = threading.Thread(name='background', target=updateVideoDisplay)
-
-videoDisplay.start()
 
 def countDownLoop():
     try:
@@ -135,8 +125,7 @@ def countDownLoop():
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
             return
 
-        # movementVal = prossessVideo()
-        movementVal = movementData.get()
+        movementVal = prossessVideo()
         if movementVal > motionSlider.get():
             print("movement")
             # @TODO Add a user setable amount of time to time remaning
@@ -192,7 +181,6 @@ def startWith1Min():  # Used for setup time
 def quit():
     cap.release()
     cv2.destroyAllWindows()
-    sys.exit
     exit()
 
 
