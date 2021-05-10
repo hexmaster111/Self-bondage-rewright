@@ -4,11 +4,13 @@
 # TODO add a way to check the cam even if we arnt running a timer
 # with a start in 1 min button and a add 1 min button
 
-import time, cv2, threading
+import time, cv2, threading, sys
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
 import numpy as np
+from queue import Queue
+
 
 
 
@@ -106,6 +108,18 @@ def prossessVideo():
     cv2.imshow('frame', frame2)
     return(stDev)
 
+movementData =  Queue()
+
+
+def updateVideoDisplay(): # make us prossess that video even if a timer isnt running
+    while True:
+        movementData.put(prossessVideo())
+        
+
+videoDisplay = threading.Thread(name='background', target=updateVideoDisplay)
+
+videoDisplay.start()
+
 def countDownLoop():
     try:
         userinput = int(hour.get())*3600 + int(minute.get()) * \
@@ -121,7 +135,8 @@ def countDownLoop():
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
             return
 
-        movementVal = prossessVideo()
+        # movementVal = prossessVideo()
+        movementVal = movementData.get()
         if movementVal > motionSlider.get():
             print("movement")
             # @TODO Add a user setable amount of time to time remaning
@@ -145,15 +160,6 @@ def countDownLoop():
         if time.time() - last_time >= 1:
             userinput -= 1
             last_time = time.time()
-
-# def updateVideoDisplay(): # make us prossess that video even if a timer isnt running
-#     while True:
-#         prossessVideo()
-
-# b = threading.Thread(name='background', target=updateVideoDisplay)
-
-# b.start()
-
 
 def release():  # Function to run whatever release mech the user selected
     # TODO add user selection to the release script/cd drive
@@ -186,6 +192,7 @@ def startWith1Min():  # Used for setup time
 def quit():
     cap.release()
     cv2.destroyAllWindows()
+    sys.exit
     exit()
 
 
