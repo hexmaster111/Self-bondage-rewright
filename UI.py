@@ -3,7 +3,14 @@
 # TODO on the setup window, there will be hiddent timer for setup time
 # TODO add a way to check the cam even if we arnt running a timer
 # TODO get the display updating when sitting idle
-# with a start in 1 min button and a add 1 min button
+# 
+# TODO Beep druing countdown option
+# TODO random time between min and max
+# TODO option to show time or not
+# TODO Amount of minutes to be added when motion is detected
+# TODO add a random teasing timer with probbablilty adjustment
+# TODO play sound when random teasing
+
 
 import time, cv2
 from tkinter import *
@@ -181,6 +188,8 @@ def startWith1Min():  # Used for setup time
 def quit():
     cap.release()
     cv2.destroyAllWindows()
+    ws.destroy()
+    setupWindow.destroy()
     exit()
 
 
