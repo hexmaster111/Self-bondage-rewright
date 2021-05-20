@@ -17,9 +17,9 @@ from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
 import numpy as np
-
-
-
+from platform import system as platform_name
+import os as system
+import ctypes
 
 
 # Window Setups
@@ -33,6 +33,7 @@ setupWindow = Tk()
 setupWindow.geometry("800x400")  # l*w+lat+lon
 setupWindow.title("Selfbondage Setup")
 setupWindow.config(bg='#345')
+
 
 # Define our globals
 release_tested = False
@@ -157,11 +158,41 @@ def countDownLoop():
             userinput -= 1
             last_time = time.time()
 
+platforms_dictionary = {
+    "Windows": {                              
+                "open" : 'ctypes.windll.WINMM.mciSendStringW(u"set cdaudio door open", None, 0, None)',
+                "close": 'ctypes.windll.WINMM.mciSendStringW(u"open L: type CDAudio alias L_drive", None, 0, None); ctypes.windll.WINMM.mciSendStringW(u"set L_drive door closed", None, 0, None)'
+               },
+    "Darwin":  {
+                "open" : 'system("drutil tray open")',
+                "close": 'system("drutil tray closed")'
+               },
+    "Linux":   {
+                "open" : 'system("eject cdrom")',
+                "close": 'system("eject -t cdrom")'
+               },
+    "NetBSD":  {
+                "open" : 'system("eject cd")',
+                "close": 'system("eject -t cd")'
+               },
+    "FreeBSD": {
+                "open" : 'system("sudo cdcontrol eject")',
+                "close": 'system("sudo cdcontrol close")'
+               }
+}
+
+
 def release():  # Function to run whatever release mech the user selected
-    # TODO add user selection to the release script/cd drive
+    # TODO Make the drive selectable and test this with more then one CD Drive
     global release_tested
     release_tested = True
     print("Release workes!!")
+    print(platform_name())
+    if platform_name() in platforms_dictionary:
+        print('Opening..')
+        exec(platforms_dictionary[platform_name()]["open"])
+    else:
+        print("Sorry, no release for your os")
 
 def startWith1Min():  # Used for setup time
     if(release_tested == False):  # if the user didnt test the release mech, we need to not run
