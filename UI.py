@@ -188,8 +188,6 @@ def countDownLoop():
 
 
 
-
-
 def release():  # Function to run whatever release mech the user selected
     # TODO Make the drive selectable and test this with more then one CD Drive
     global release_tested
