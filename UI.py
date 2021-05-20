@@ -35,6 +35,8 @@ setupWindow.geometry("800x400")  # l*w+lat+lon
 setupWindow.title("Selfbondage Setup")
 setupWindow.config(bg='#345')
 
+#Open CV Setup
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 # Define our globals
 release_tested = False
@@ -76,6 +78,28 @@ sec_tf = Entry(
 
 sec_tf.place(x=180, y=20)
 
+platforms_dictionary = {
+    "Windows": {
+        "open": 'ctypes.windll.WINMM.mciSendStringW(u"set cdaudio door open", None, 0, None)',
+        "close": 'ctypes.windll.WINMM.mciSendStringW(u"open L: type CDAudio alias L_drive", None, 0, None); ctypes.windll.WINMM.mciSendStringW(u"set L_drive door closed", None, 0, None)'
+    },
+    "Darwin":  {
+        "open": 'system("drutil tray open")',
+        "close": 'system("drutil tray closed")'
+    },
+    "Linux":   {
+        "open": 'system("eject cdrom")',
+        "close": 'system("eject -t cdrom")'
+    },
+    "NetBSD":  {
+        "open": 'system("eject cd")',
+        "close": 'system("eject -t cd")'
+    },
+    "FreeBSD": {
+        "open": 'system("sudo cdcontrol eject")',
+        "close": 'system("sudo cdcontrol close")'
+    }
+}
 
 def distMap(frame1, frame2):
     """outputs pythagorean distance between two frames"""
@@ -90,7 +114,6 @@ def distMap(frame1, frame2):
 
 cv2.namedWindow('frame')
 cv2.namedWindow('dist')
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 
 def prossessVideo():
@@ -119,6 +142,8 @@ def prossessVideo():
         round(stDev[0][0], 0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
     cv2.imshow('frame', frame2)
     return(stDev)
+
+
 
 
 def countDownLoop():
@@ -162,28 +187,7 @@ def countDownLoop():
             last_time = time.time()
 
 
-platforms_dictionary = {
-    "Windows": {
-        "open": 'ctypes.windll.WINMM.mciSendStringW(u"set cdaudio door open", None, 0, None)',
-        "close": 'ctypes.windll.WINMM.mciSendStringW(u"open L: type CDAudio alias L_drive", None, 0, None); ctypes.windll.WINMM.mciSendStringW(u"set L_drive door closed", None, 0, None)'
-    },
-    "Darwin":  {
-        "open": 'system("drutil tray open")',
-        "close": 'system("drutil tray closed")'
-    },
-    "Linux":   {
-        "open": 'system("eject cdrom")',
-        "close": 'system("eject -t cdrom")'
-    },
-    "NetBSD":  {
-        "open": 'system("eject cd")',
-        "close": 'system("eject -t cd")'
-    },
-    "FreeBSD": {
-        "open": 'system("sudo cdcontrol eject")',
-        "close": 'system("sudo cdcontrol close")'
-    }
-}
+
 
 
 def release():  # Function to run whatever release mech the user selected
