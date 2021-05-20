@@ -3,7 +3,7 @@
 # TODO on the setup window, there will be hiddent timer for setup time
 # TODO add a way to check the cam even if we arnt running a timer
 # TODO get the display updating when sitting idle
-# 
+#
 # TODO Beep druing countdown option
 # TODO random time between min and max
 # TODO option to show time or not
@@ -12,7 +12,8 @@
 # TODO play sound when random teasing
 
 
-import time, cv2
+import time
+import cv2
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
@@ -75,6 +76,7 @@ sec_tf = Entry(
 
 sec_tf.place(x=180, y=20)
 
+
 def distMap(frame1, frame2):
     """outputs pythagorean distance between two frames"""
     frame1_32 = np.float32(frame1)
@@ -85,9 +87,11 @@ def distMap(frame1, frame2):
     dist = np.uint8(norm32*255)
     return dist
 
+
 cv2.namedWindow('frame')
 cv2.namedWindow('dist')
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
 
 def prossessVideo():
     _, frame1 = cap.read()
@@ -115,7 +119,6 @@ def prossessVideo():
         round(stDev[0][0], 0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
     cv2.imshow('frame', frame2)
     return(stDev)
-
 
 
 def countDownLoop():
@@ -158,27 +161,28 @@ def countDownLoop():
             userinput -= 1
             last_time = time.time()
 
+
 platforms_dictionary = {
-    "Windows": {                              
-                "open" : 'ctypes.windll.WINMM.mciSendStringW(u"set cdaudio door open", None, 0, None)',
-                "close": 'ctypes.windll.WINMM.mciSendStringW(u"open L: type CDAudio alias L_drive", None, 0, None); ctypes.windll.WINMM.mciSendStringW(u"set L_drive door closed", None, 0, None)'
-               },
+    "Windows": {
+        "open": 'ctypes.windll.WINMM.mciSendStringW(u"set cdaudio door open", None, 0, None)',
+        "close": 'ctypes.windll.WINMM.mciSendStringW(u"open L: type CDAudio alias L_drive", None, 0, None); ctypes.windll.WINMM.mciSendStringW(u"set L_drive door closed", None, 0, None)'
+    },
     "Darwin":  {
-                "open" : 'system("drutil tray open")',
-                "close": 'system("drutil tray closed")'
-               },
+        "open": 'system("drutil tray open")',
+        "close": 'system("drutil tray closed")'
+    },
     "Linux":   {
-                "open" : 'system("eject cdrom")',
-                "close": 'system("eject -t cdrom")'
-               },
+        "open": 'system("eject cdrom")',
+        "close": 'system("eject -t cdrom")'
+    },
     "NetBSD":  {
-                "open" : 'system("eject cd")',
-                "close": 'system("eject -t cd")'
-               },
+        "open": 'system("eject cd")',
+        "close": 'system("eject -t cd")'
+    },
     "FreeBSD": {
-                "open" : 'system("sudo cdcontrol eject")',
-                "close": 'system("sudo cdcontrol close")'
-               }
+        "open": 'system("sudo cdcontrol eject")',
+        "close": 'system("sudo cdcontrol close")'
+    }
 }
 
 
@@ -193,6 +197,7 @@ def release():  # Function to run whatever release mech the user selected
         exec(platforms_dictionary[platform_name()]["open"])
     else:
         print("Sorry, no release for your os")
+
 
 def startWith1Min():  # Used for setup time
     if(release_tested == False):  # if the user didnt test the release mech, we need to not run
@@ -215,6 +220,7 @@ def startWith1Min():  # Used for setup time
             display_time -= 1
             last_time = time.time()
     countDownLoop()
+
 
 def quit():
     cap.release()
@@ -268,7 +274,7 @@ motionSlider = Scale(setupWindow, from_=0, to=50,
 motionSlider.set(15)
 motionSlider.pack()
 
-#Entry box
+# Entry box
 
 
 # setting up lables
