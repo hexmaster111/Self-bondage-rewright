@@ -38,6 +38,9 @@ setupWindow.config(bg='#345')
 #Open CV Setup
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
+cv2.namedWindow('frame')
+cv2.namedWindow('dist')
+
 # Define our globals
 release_tested = False
 hour = StringVar()
@@ -112,8 +115,38 @@ def distMap(frame1, frame2):
     return dist
 
 
-cv2.namedWindow('frame')
-cv2.namedWindow('dist')
+
+
+
+def getVideo():
+    # Just get the video so that we can display it while the timer is not running
+    _, frame1 = cap.read()
+    _, frame2 = cap.read()
+
+    _, frame3 = cap.read()
+    rows, cols, _ = np.shape(frame3)
+    cv2.imshow('dist', frame3)
+    dist = distMap(frame1, frame3)
+
+    frame1 = frame2
+    frame2 = frame3
+
+    # apply Gaussian smoothing
+    mod = cv2.GaussianBlur(dist, (9, 9), 0)
+
+    # apply thresholding
+    _, thresh = cv2.threshold(mod, 100, 255, 0)
+
+    # calculate st dev test
+    _, stDev = cv2.meanStdDev(mod)
+
+    cv2.imshow('dist', mod)
+    cv2.putText(frame2, "Movement Score - {}".format(
+        round(stDev[0][0], 0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
+    cv2.imshow('frame', frame2)
+
+# while True:
+#     getVideo()
 
 
 def prossessVideo():
@@ -185,6 +218,7 @@ def countDownLoop():
         if time.time() - last_time >= 1:
             userinput -= 1
             last_time = time.time()
+
 
 
 
