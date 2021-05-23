@@ -116,39 +116,6 @@ def distMap(frame1, frame2):
 
 
 
-
-
-def getVideo():
-    # Just get the video so that we can display it while the timer is not running
-    _, frame1 = cap.read()
-    _, frame2 = cap.read()
-
-    _, frame3 = cap.read()
-    rows, cols, _ = np.shape(frame3)
-    cv2.imshow('dist', frame3)
-    dist = distMap(frame1, frame3)
-
-    frame1 = frame2
-    frame2 = frame3
-
-    # apply Gaussian smoothing
-    mod = cv2.GaussianBlur(dist, (9, 9), 0)
-
-    # apply thresholding
-    _, thresh = cv2.threshold(mod, 100, 255, 0)
-
-    # calculate st dev test
-    _, stDev = cv2.meanStdDev(mod)
-
-    cv2.imshow('dist', mod)
-    cv2.putText(frame2, "Movement Score - {}".format(
-        round(stDev[0][0], 0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
-    cv2.imshow('frame', frame2)
-
-# while True:
-#     getVideo()
-
-
 def prossessVideo():
     _, frame1 = cap.read()
     _, frame2 = cap.read()
@@ -175,6 +142,10 @@ def prossessVideo():
         round(stDev[0][0], 0)), (70, 70), font, 1, (255, 0, 255), 1, cv2.LINE_AA)
     cv2.imshow('frame', frame2)
     return(stDev)
+
+
+
+
 
 
 
@@ -318,7 +289,6 @@ motionSlider.pack()
 setupTimer = tk.Label(setupWindow)
 setupTimer.place(x=140, y=000)
 #
-
 
 ws.mainloop()
 setupWindow.mainloop()
