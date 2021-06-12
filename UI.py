@@ -15,6 +15,8 @@
 import time
 import cv2
 import serial
+import warnings
+import serial.tools.list_ports
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
@@ -23,7 +25,23 @@ from platform import system as platform_name
 import os as system
 import ctypes
 
-arduino = serial.Serial('COM9', 9600)
+# Locate our arduino
+# May need to be changed to work with your board
+
+arduino_ports = [
+    p.device
+    for p in serial.tools.list_ports.comports()
+    if 'USB-SER' in p.description  # may need tweaking to match new arduinos
+]
+if not arduino_ports:
+    raise IOError("No Arduino found")
+if len(arduino_ports) > 1:
+    warnings.warn('Multiple Arduinos found - using the first')
+
+arduino = serial.Serial(arduino_ports[0])
+
+print(arduino)
+
 
 # Window Setups
 f = ("Arial", 24)
@@ -37,7 +55,7 @@ setupWindow.geometry("800x400")  # l*w+lat+lon
 setupWindow.title("Selfbondage Setup")
 setupWindow.config(bg='#345')
 
-#Open CV Setup
+# Open CV Setup
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 cv2.namedWindow('frame')
@@ -106,6 +124,21 @@ platforms_dictionary = {
     }
 }
 
+teaseToggle = False
+teaseEnable = True
+
+def tease():
+    global teaseToggle
+    global teaseEnable
+    if teaseEnable:
+        if teaseToggle:
+            arduino.write(b'0')
+            teaseToggle = False
+        else:
+            arduino.write(b'2')
+            teaseToggle = True
+
+
 def distMap(frame1, frame2):
     """outputs pythagorean distance between two frames"""
     frame1_32 = np.float32(frame1)
@@ -115,7 +148,6 @@ def distMap(frame1, frame2):
                      2 + diff32[:, :, 2]**2)/np.sqrt(255**2 + 255**2 + 255**2)
     dist = np.uint8(norm32*255)
     return dist
-
 
 
 def prossessVideo():
@@ -146,12 +178,6 @@ def prossessVideo():
     return(stDev)
 
 
-
-
-
-
-
-
 def countDownLoop():
     try:
         userinput = int(hour.get())*3600 + int(minute.get()) * \
@@ -167,9 +193,11 @@ def countDownLoop():
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
             return
 
+
         movementVal = prossessVideo()
         if movementVal > motionSlider.get():
             print("movement")
+            tease()
             # @TODO Add a user setable amount of time to time remaning
 
         mins, secs = divmod(userinput, 60)
@@ -193,8 +221,6 @@ def countDownLoop():
             last_time = time.time()
 
 
-
-
 def release():  # Function to run whatever release mech the user selected
     # TODO Make the drive selectable and test this with more then one CD Drive
     global release_tested
@@ -202,9 +228,9 @@ def release():  # Function to run whatever release mech the user selected
     print("Release workes!!")
 
     print("Trying Arduino")
-    arduino.write(b'0')
+    arduino.write(b'0') #Release
     time.sleep(5)
-    arduino.write(b'1')
+    arduino.write(b'1') #Hold
 
     print(platform_name())
     if platform_name() in platforms_dictionary:

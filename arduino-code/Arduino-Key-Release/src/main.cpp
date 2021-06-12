@@ -13,32 +13,24 @@ void setup()
   keyReleaseServo.attach(2);
 }
 
-// if (datafromUser == '1')
-// {
-//   digitalWrite(LED_BUILTIN, HIGH);
-//   keyReleaseServo.write(0);
-// }
-// else if (datafromUser == '0')
-// {
-//   digitalWrite(LED_BUILTIN, LOW);
-//   keyReleaseServo.write(180);
-// }
-
 void inputDesion(int opperation)
 {
   switch (opperation)
   {
-  case '0':
+  case '0': //Hold
     keyReleaseServo.write(180);
     digitalWrite(LED_BUILTIN, LOW);
     break;
-  case '1':
+  case '1': //Release
     keyReleaseServo.write(0);
     digitalWrite(LED_BUILTIN, HIGH);
     break;
-  case '2':
+  case '2': //90 deg
     keyReleaseServo.write(90);
     digitalWrite(LED_BUILTIN, HIGH);
+    break;
+  case '3': //unused
+
     break;
 
   default:
