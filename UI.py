@@ -14,6 +14,7 @@
 
 import time
 import cv2
+import serial
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
@@ -22,6 +23,7 @@ from platform import system as platform_name
 import os as system
 import ctypes
 
+arduino = serial.Serial('COM9', 9600)
 
 # Window Setups
 f = ("Arial", 24)
@@ -198,6 +200,12 @@ def release():  # Function to run whatever release mech the user selected
     global release_tested
     release_tested = True
     print("Release workes!!")
+
+    print("Trying Arduino")
+    arduino.write(b'0')
+    time.sleep(5)
+    arduino.write(b'1')
+
     print(platform_name())
     if platform_name() in platforms_dictionary:
         print('Opening..')
