@@ -232,14 +232,41 @@ def countDownLoop():
             userinput -= 1
             last_time = time.time()
 
+def release_test():
+    global release_tested
+    global arduino_enabled
+    global DiskDrive_enabled
+
+    release_tested = True
+
+    print("Release tested")
+
+    if arduino_enabled:
+        print("Trying Arduino")
+        arduino.write(b'0') #Release
+        time.sleep(5)
+        arduino.write(b'1') #Hold
+
+    if DiskDrive_enabled:
+        print("Trying Disk Drive")
+        print(platform_name())
+        if platform_name() in platforms_dictionary:
+            print('Opening..')
+            exec(platforms_dictionary[platform_name()]["open"])
+        else:
+            print("Sorry, no release for your os")
+
+
+
+
 
 def release():  # Function to run whatever release mech the user selected
     # TODO Make the drive selectable and test this with more then one CD Drive
     global release_tested
-    release_tested = True
-    print("Release tested")
+    global arduino_enabled
+
     if arduino_enabled:
-        print("Trying Arduino")
+        print("Releasing with arduino")
         arduino.write(b'0') #Release
         time.sleep(5)
         arduino.write(b'1') #Hold
@@ -282,6 +309,33 @@ def quit():
     setupWindow.destroy()
     exit()
 
+arduino_enabled = False
+DiskDrive_enabled = False
+
+def arduinoEnabledToggle(): 
+    global arduino_enabled
+    arduino_enabled = not arduino_enabled
+    print("Arduino enabled = ")
+    print(arduino_enabled)
+
+def DiskDrive_enabledToggle():
+    global DiskDrive_enabled
+    DiskDrive_enabled = not DiskDrive_enabled
+    print("DiskDriveEnable enabled = ")
+    print(DiskDrive_enabled)
+
+uslessVarNO1 = BooleanVar()
+uslessVarNO2 = BooleanVar()
+
+# Checkbox Deffs
+arduinoCheckBox = tk.Checkbutton(setupWindow, text='Use Arduino', variable=uslessVarNO1, onvalue=True, offvalue=False,
+command=arduinoEnabledToggle)
+arduinoCheckBox.pack(side=tk.LEFT)
+
+DiskDriveCheckBox = tk.Checkbutton(setupWindow, text='Use Disk Eject', variable=uslessVarNO2, onvalue=True, offvalue=False,
+command=DiskDrive_enabledToggle)
+DiskDriveCheckBox.pack(side=tk.LEFT)
+
 
 # Where we place all the buttons
 start_btn = Button(
@@ -315,7 +369,7 @@ test_release = Button(
     setupWindow,
     text='Test Release',
     bd='5',
-    command=release
+    command=release_test
 )
 
 test_release.place(x=120, y=150)
@@ -335,6 +389,8 @@ motionSlider.pack()
 setupTimer = tk.Label(setupWindow)
 setupTimer.place(x=140, y=000)
 #
+
+
 
 ws.mainloop()
 setupWindow.mainloop()
