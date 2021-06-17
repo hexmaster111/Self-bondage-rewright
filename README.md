@@ -1,6 +1,5 @@
 # Self-bondage-rewright
 
-***NOT IN A USABLE STATE RIGHT NOW***
 
 ## Setting up the python env windows
 
