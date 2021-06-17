@@ -108,32 +108,6 @@ platforms_dictionary = {
     }
 }
 
-
-
-# Locate our arduino
-# May need to be changed to work with your board
-
-arduino_enabled = False
-
-if arduino_enabled:
-    arduino_ports = [
-        p.device
-        for p in serial.tools.list_ports.comports()
-        if 'USB-SER' in p.description  # may need tweaking to match new arduinos
-    ]
-    if not arduino_ports:
-        messagebox.showwarning('', 'No Arduino Found, check cable and that drivers are installed')
-    if len(arduino_ports) > 1:
-        messagebox.showwarning('', 'Multiple Arduinos found, using the first')
-
-    arduino = serial.Serial(arduino_ports[0])
-
-    print(arduino)
-else:
-    print("Arduino Disabled...")
-
-
-
 teaseToggle = False
 teaseEnable = True
 
@@ -236,25 +210,55 @@ def release_test():
     global release_tested
     global arduino_enabled
     global DiskDrive_enabled
+    global arduino
 
-    release_tested = True
+    
 
     print("Release tested")
 
+### Find arduino on first run
+    if arduino_enabled and not release_tested:
+        arduino_ports = [
+            p.device
+            for p in serial.tools.list_ports.comports()
+            if 'USB-SER' in p.description  # may need tweaking to match new arduinos
+        ]
+        if not arduino_ports:
+            messagebox.showwarning('', 'No Arduino Found, check cable and that drivers are installed')
+        if len(arduino_ports) > 1:
+            messagebox.showwarning('', 'Multiple Arduinos found, using the first')
+
+        arduino = serial.Serial(arduino_ports[0])
+
+        print(arduino)
+
     if arduino_enabled:
+
         print("Trying Arduino")
-        arduino.write(b'0') #Release
-        time.sleep(5)
+
+##### Jog Servo to positions
+        messagebox.showwarning('', 'press ok to\n Move Servo to HOLD KEY Position')
         arduino.write(b'1') #Hold
+        messagebox.showwarning('', 'press ok to\nMove Servo to RELEASE KEY Position')
+        arduino.write(b'0') #Release
+        if teaseEnable:
+            messagebox.showwarning('', 'press ok to\nMove Servo to TEASE Position')
+            arduino.write(b'2') #Tease
+        messagebox.showwarning('', 'press ok to\nMove Servo back to HOLD KEY Position')
+        arduino.write(b'1') #Hold
+
+### Pop open disk drive        
 
     if DiskDrive_enabled:
         print("Trying Disk Drive")
         print(platform_name())
         if platform_name() in platforms_dictionary:
-            messagebox.showwarning('', 'The Disk Drive should now open')
+            messagebox.showwarning('', 'Press OK to open Disk Drive')
             exec(platforms_dictionary[platform_name()]["open"])
         else:
             messagebox.showwarning('', 'OS not supported\n Open an issue on github and we can try!!')
+
+    release_tested = True
 
 
 
