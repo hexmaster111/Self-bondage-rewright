@@ -28,19 +28,23 @@ import ctypes
 # Locate our arduino
 # May need to be changed to work with your board
 
-arduino_ports = [
-    p.device
-    for p in serial.tools.list_ports.comports()
-    if 'USB-SER' in p.description  # may need tweaking to match new arduinos
-]
-if not arduino_ports:
-    raise IOError("No Arduino found")
-if len(arduino_ports) > 1:
-    warnings.warn('Multiple Arduinos found - using the first')
+arduino_enabled = False
 
-arduino = serial.Serial(arduino_ports[0])
+if arduino_enabled:
+    arduino_ports = [
+        p.device
+        for p in serial.tools.list_ports.comports()
+        if 'USB-SER' in p.description  # may need tweaking to match new arduinos
+    ]
+    if not arduino_ports:
+        messagebox.showwarning('', 'No Arduino Found, check cable and that drivers are installed')
+    if len(arduino_ports) > 1:
+        messagebox.showwarning('', 'Multiple Arduinos found, using the first')
+        warnings.warn('Multiple Arduinos found - using the first')
 
-print(arduino)
+    arduino = serial.Serial(arduino_ports[0])
+
+    print(arduino)
 
 
 # Window Setups
@@ -132,10 +136,12 @@ def tease():
     global teaseEnable
     if teaseEnable:
         if teaseToggle:
-            arduino.write(b'0')
+            if arduino_enabled:
+                arduino.write(b'0')
             teaseToggle = False
         else:
-            arduino.write(b'2')
+            if arduino_enabled:
+                arduino.write(b'2')
             teaseToggle = True
 
 
@@ -225,12 +231,12 @@ def release():  # Function to run whatever release mech the user selected
     # TODO Make the drive selectable and test this with more then one CD Drive
     global release_tested
     release_tested = True
-    print("Release workes!!")
-
-    print("Trying Arduino")
-    arduino.write(b'0') #Release
-    time.sleep(5)
-    arduino.write(b'1') #Hold
+    print("Release tested")
+    if arduino_enabled:
+        print("Trying Arduino")
+        arduino.write(b'0') #Release
+        time.sleep(5)
+        arduino.write(b'1') #Hold
 
     print(platform_name())
     if platform_name() in platforms_dictionary:
