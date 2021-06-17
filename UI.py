@@ -251,10 +251,10 @@ def release_test():
         print("Trying Disk Drive")
         print(platform_name())
         if platform_name() in platforms_dictionary:
-            print('Opening..')
+            messagebox.showwarning('', 'The Disk Drive should now open')
             exec(platforms_dictionary[platform_name()]["open"])
         else:
-            print("Sorry, no release for your os")
+            messagebox.showwarning('', 'OS not supported\n Open an issue on github and we can try!!')
 
 
 
@@ -271,12 +271,11 @@ def release():  # Function to run whatever release mech the user selected
         time.sleep(5)
         arduino.write(b'1') #Hold
 
-    print(platform_name())
-    if platform_name() in platforms_dictionary:
-        print('Opening..')
-        exec(platforms_dictionary[platform_name()]["open"])
-    else:
-        print("Sorry, no release for your os")
+    if DiskDrive_enabled:
+        print(platform_name())
+        if platform_name() in platforms_dictionary:
+            print('Releasing with Disk Drive')
+            exec(platforms_dictionary[platform_name()]["open"])
 
 
 def startWith1Min():  # Used for setup time
@@ -389,8 +388,6 @@ motionSlider.pack()
 setupTimer = tk.Label(setupWindow)
 setupTimer.place(x=140, y=000)
 #
-
-
 
 ws.mainloop()
 setupWindow.mainloop()
