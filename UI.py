@@ -110,19 +110,16 @@ platforms_dictionary = {
 teaseToggle = False
 
 
-
 def tease():
     global teaseToggle
-    global teaseEnable
-    if teaseEnable:
-        if teaseToggle:
-            if arduino_enabled:
-                arduino.write(b'0')
-            teaseToggle = False
-        else:
-            if arduino_enabled:
-                arduino.write(b'2')
-            teaseToggle = True
+    if teaseToggle:
+        if arduino_enabled:
+            arduino.write(b'0')
+        teaseToggle = False
+    else:
+        if arduino_enabled:
+            arduino.write(b'2')
+        teaseToggle = True
 
 
 def distMap(frame1, frame2):
@@ -164,7 +161,10 @@ def prossessVideo():
     return(stDev)
 
 
+timesMovedCurrently = 0
+
 def countDownLoop():
+    global timesMovedCurrently
     try:
         userinput = int(hour.get())*3600 + int(minute.get()) * \
             60 + int(second.get())
@@ -180,10 +180,21 @@ def countDownLoop():
             return
 
         movementVal = prossessVideo()
+
         if movementVal > motionSlider.get():
             print("movement")
-            tease()
-            # @TODO Add a user setable amount of time to time remaning
+            if teaseEnable:
+                tease()
+
+
+            if addTimeOnMovement and timesMovedCurrently <= int(timeaddCountBox.get()): #add more time per a user settable ammount to the timer 
+                #@TODO add a max amount of times to be teased and make it user setable
+                timeToAdd = int(timePerMovementBox.get())
+                print("adding time...")
+                userinput = userinput+timeToAdd
+                timesMovedCurrently = timesMovedCurrently + 1
+                print(timesMovedCurrently)
+            
 
         mins, secs = divmod(userinput, 60)
         hours = 0
@@ -213,8 +224,13 @@ def release_test():
     global arduino
     global teaseEnable
 
+    if not arduino_enabled and not DiskDrive_enabled:
+        messagebox.showwarning(
+            '', 'No Release Methid selected\nYou may still start the program')
+
     if teaseEnable and not arduino_enabled:
-        messagebox.showwarning('', 'Arduino must be enabled in order to use the arduino tease')
+        messagebox.showwarning(
+            '', 'Arduino must be enabled in order to use the arduino tease')
         return
 
 # Find arduino on first run
@@ -270,7 +286,6 @@ def release_test():
 
 
 def release():  # Function to run whatever release mech the user selected
-    # TODO Make the drive selectable and test this with more then one CD Drive
     global release_tested
     global arduino_enabled
 
@@ -321,6 +336,7 @@ def quit():
 arduino_enabled = False
 DiskDrive_enabled = False
 teaseEnable = False
+addTimeOnMovement = False
 
 def arduinoEnabledToggle():
     global arduino_enabled
@@ -335,30 +351,54 @@ def DiskDrive_enabledToggle():
     print("DiskDriveEnable enabled = ")
     print(DiskDrive_enabled)
 
+
 def teaseEnable_enabledToggle():
     global teaseEnable
     teaseEnable = not teaseEnable
     print("Teasing is = ")
-    print(teaseEnable) 
+    print(teaseEnable)
+
+def timeOnMovementToggle():
+    global addTimeOnMovement
+    addTimeOnMovement = not addTimeOnMovement
+    print("Adding Time On Tease is = ")
+    print(addTimeOnMovement)
 
 
 uslessVarNO1 = BooleanVar()
 uslessVarNO2 = BooleanVar()
 uslessVarNO3 = BooleanVar()
+uslessVarNO4 = BooleanVar()
 
 # Checkbox Deffs
 arduinoCheckBox = tk.Checkbutton(setupWindow, text='Use Arduino', variable=uslessVarNO1, onvalue=True, offvalue=False,
                                  command=arduinoEnabledToggle)
 arduinoCheckBox.pack(side=tk.LEFT)
 
-DiskDriveCheckBox = tk.Checkbutton(setupWindow, text='Arduino Servo Key Jiggle Tease', variable=uslessVarNO3, onvalue=True, offvalue=False,
+keyJiggleCheck = tk.Checkbutton(setupWindow, text='Arduino Servo Key Jiggle Tease', variable=uslessVarNO3, onvalue=True, offvalue=False,
                                    command=teaseEnable_enabledToggle)
-DiskDriveCheckBox.pack(side=tk.LEFT)
+keyJiggleCheck.pack(side=tk.LEFT)
 
 DiskDriveCheckBox = tk.Checkbutton(setupWindow, text='Use Disk Eject', variable=uslessVarNO2, onvalue=True, offvalue=False,
                                    command=DiskDrive_enabledToggle)
 DiskDriveCheckBox.pack(side=tk.LEFT)
 
+addTimeOnTeaseCheck = tk.Checkbutton(setupWindow, text='Add Time On Movement', variable=uslessVarNO4, onvalue=True, offvalue=False,
+                                   command=timeOnMovementToggle)
+addTimeOnTeaseCheck.pack(side=tk.LEFT)
+
+
+#Number Input stuffs
+timePerMovementVar = IntVar()
+timePerMovementBox = Entry(setupWindow)
+timePerMovementBox.insert(0, "Add time sec")
+timePerMovementBox.pack(side=tk.LEFT)
+
+
+timeaddCountVar = IntVar()
+timeaddCountBox = Entry(setupWindow)
+timeaddCountBox.insert(0, "Max times to add")
+timeaddCountBox.pack(side=tk.LEFT)
 
 
 # Where we place all the buttons
@@ -409,7 +449,7 @@ motionSlider.pack()
 # timer for tie up time
 setupTimer = tk.Label(setupWindow)
 setupTimer.place(x=140, y=000)
-#
+
 
 ws.mainloop()
 setupWindow.mainloop()
