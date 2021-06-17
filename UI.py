@@ -26,7 +26,6 @@ import os as system
 import ctypes
 
 
-
 # Window Setups
 f = ("Arial", 24)
 ws = Tk()
@@ -109,7 +108,8 @@ platforms_dictionary = {
 }
 
 teaseToggle = False
-teaseEnable = True
+
+
 
 def tease():
     global teaseToggle
@@ -179,7 +179,6 @@ def countDownLoop():
  SESSION WILL NOT START UNTEL YOU CHECK IT WORKS')
             return
 
-
         movementVal = prossessVideo()
         if movementVal > motionSlider.get():
             print("movement")
@@ -206,17 +205,19 @@ def countDownLoop():
             userinput -= 1
             last_time = time.time()
 
+
 def release_test():
     global release_tested
     global arduino_enabled
     global DiskDrive_enabled
     global arduino
+    global teaseEnable
 
-    
+    if teaseEnable and not arduino_enabled:
+        messagebox.showwarning('', 'Arduino must be enabled in order to use the arduino tease')
+        return
 
-    print("Release tested")
-
-### Find arduino on first run
+# Find arduino on first run
     if arduino_enabled and not release_tested:
         arduino_ports = [
             p.device
@@ -224,9 +225,11 @@ def release_test():
             if 'USB-SER' in p.description  # may need tweaking to match new arduinos
         ]
         if not arduino_ports:
-            messagebox.showwarning('', 'No Arduino Found, check cable and that drivers are installed')
+            messagebox.showwarning(
+                '', 'No Arduino Found, check cable and that drivers are installed')
         if len(arduino_ports) > 1:
-            messagebox.showwarning('', 'Multiple Arduinos found, using the first')
+            messagebox.showwarning(
+                '', 'Multiple Arduinos found, using the first')
 
         arduino = serial.Serial(arduino_ports[0])
 
@@ -236,18 +239,22 @@ def release_test():
 
         print("Trying Arduino")
 
-##### Jog Servo to positions
-        messagebox.showwarning('', 'press ok to\n Move Servo to HOLD KEY Position')
-        arduino.write(b'1') #Hold
-        messagebox.showwarning('', 'press ok to\nMove Servo to RELEASE KEY Position')
-        arduino.write(b'0') #Release
+# Jog Servo to positions
+        messagebox.showwarning(
+            '', 'press ok to\n Move Servo to HOLD KEY Position')
+        arduino.write(b'1')  # Hold
+        messagebox.showwarning(
+            '', 'press ok to\nMove Servo to RELEASE KEY Position')
+        arduino.write(b'0')  # Release
         if teaseEnable:
-            messagebox.showwarning('', 'press ok to\nMove Servo to TEASE Position')
-            arduino.write(b'2') #Tease
-        messagebox.showwarning('', 'press ok to\nMove Servo back to HOLD KEY Position')
-        arduino.write(b'1') #Hold
+            messagebox.showwarning(
+                '', 'press ok to\nMove Servo to TEASE Position')
+            arduino.write(b'2')  # Tease
+        messagebox.showwarning(
+            '', 'press ok to\nMove Servo back to HOLD KEY Position')
+        arduino.write(b'1')  # Hold
 
-### Pop open disk drive        
+# Pop open disk drive
 
     if DiskDrive_enabled:
         print("Trying Disk Drive")
@@ -256,12 +263,10 @@ def release_test():
             messagebox.showwarning('', 'Press OK to open Disk Drive')
             exec(platforms_dictionary[platform_name()]["open"])
         else:
-            messagebox.showwarning('', 'OS not supported\n Open an issue on github and we can try!!')
+            messagebox.showwarning(
+                '', 'OS not supported\n Open an issue on github and we can try!!')
 
     release_tested = True
-
-
-
 
 
 def release():  # Function to run whatever release mech the user selected
@@ -271,9 +276,9 @@ def release():  # Function to run whatever release mech the user selected
 
     if arduino_enabled:
         print("Releasing with arduino")
-        arduino.write(b'0') #Release
+        arduino.write(b'0')  # Release
         time.sleep(5)
-        arduino.write(b'1') #Hold
+        arduino.write(b'1')  # Hold
 
     if DiskDrive_enabled:
         print(platform_name())
@@ -312,14 +317,17 @@ def quit():
     setupWindow.destroy()
     exit()
 
+
 arduino_enabled = False
 DiskDrive_enabled = False
+teaseEnable = False
 
-def arduinoEnabledToggle(): 
+def arduinoEnabledToggle():
     global arduino_enabled
     arduino_enabled = not arduino_enabled
     print("Arduino enabled = ")
     print(arduino_enabled)
+
 
 def DiskDrive_enabledToggle():
     global DiskDrive_enabled
@@ -327,17 +335,30 @@ def DiskDrive_enabledToggle():
     print("DiskDriveEnable enabled = ")
     print(DiskDrive_enabled)
 
+def teaseEnable_enabledToggle():
+    global teaseEnable
+    teaseEnable = not teaseEnable
+    print("Teasing is = ")
+    print(teaseEnable) 
+
+
 uslessVarNO1 = BooleanVar()
 uslessVarNO2 = BooleanVar()
+uslessVarNO3 = BooleanVar()
 
 # Checkbox Deffs
 arduinoCheckBox = tk.Checkbutton(setupWindow, text='Use Arduino', variable=uslessVarNO1, onvalue=True, offvalue=False,
-command=arduinoEnabledToggle)
+                                 command=arduinoEnabledToggle)
 arduinoCheckBox.pack(side=tk.LEFT)
 
-DiskDriveCheckBox = tk.Checkbutton(setupWindow, text='Use Disk Eject', variable=uslessVarNO2, onvalue=True, offvalue=False,
-command=DiskDrive_enabledToggle)
+DiskDriveCheckBox = tk.Checkbutton(setupWindow, text='Arduino Servo Key Jiggle Tease', variable=uslessVarNO3, onvalue=True, offvalue=False,
+                                   command=teaseEnable_enabledToggle)
 DiskDriveCheckBox.pack(side=tk.LEFT)
+
+DiskDriveCheckBox = tk.Checkbutton(setupWindow, text='Use Disk Eject', variable=uslessVarNO2, onvalue=True, offvalue=False,
+                                   command=DiskDrive_enabledToggle)
+DiskDriveCheckBox.pack(side=tk.LEFT)
+
 
 
 # Where we place all the buttons
@@ -383,9 +404,6 @@ motionSlider = Scale(setupWindow, from_=0, to=50,
                      length=1000, tickinterval=1)
 motionSlider.set(15)
 motionSlider.pack()
-
-# Entry box
-
 
 # setting up lables
 # timer for tie up time
