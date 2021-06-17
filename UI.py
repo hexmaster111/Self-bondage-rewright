@@ -25,26 +25,6 @@ from platform import system as platform_name
 import os as system
 import ctypes
 
-# Locate our arduino
-# May need to be changed to work with your board
-
-arduino_enabled = False
-
-if arduino_enabled:
-    arduino_ports = [
-        p.device
-        for p in serial.tools.list_ports.comports()
-        if 'USB-SER' in p.description  # may need tweaking to match new arduinos
-    ]
-    if not arduino_ports:
-        messagebox.showwarning('', 'No Arduino Found, check cable and that drivers are installed')
-    if len(arduino_ports) > 1:
-        messagebox.showwarning('', 'Multiple Arduinos found, using the first')
-        warnings.warn('Multiple Arduinos found - using the first')
-
-    arduino = serial.Serial(arduino_ports[0])
-
-    print(arduino)
 
 
 # Window Setups
@@ -127,6 +107,32 @@ platforms_dictionary = {
         "close": 'system("sudo cdcontrol close")'
     }
 }
+
+
+
+# Locate our arduino
+# May need to be changed to work with your board
+
+arduino_enabled = False
+
+if arduino_enabled:
+    arduino_ports = [
+        p.device
+        for p in serial.tools.list_ports.comports()
+        if 'USB-SER' in p.description  # may need tweaking to match new arduinos
+    ]
+    if not arduino_ports:
+        messagebox.showwarning('', 'No Arduino Found, check cable and that drivers are installed')
+    if len(arduino_ports) > 1:
+        messagebox.showwarning('', 'Multiple Arduinos found, using the first')
+
+    arduino = serial.Serial(arduino_ports[0])
+
+    print(arduino)
+else:
+    print("Arduino Disabled...")
+
+
 
 teaseToggle = False
 teaseEnable = True
